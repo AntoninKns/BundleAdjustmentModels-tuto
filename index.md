@@ -1,7 +1,7 @@
-@def title = "Template"
+@def title = "How to use bundle adjustment models"
 @def showall = true
-@def tags = ["template", "fix-me"]
+@def tags = ["bundle adjustment", "model", "big sparse matrices"]
 
-\preamble{AUTHORS}
+\preamble{Antonin Kenens}
 
 \literate{/index.jl}
