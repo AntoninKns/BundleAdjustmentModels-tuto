@@ -1,40 +1,15 @@
 <!--This file was generated, do not modify it.-->
-# Template for jso-docs separate pages
+# How to use bundle adjustment models
 
 \toc
 
-Modify this file
-
-## Testing
-
-Testing
-
 ```julia:ex1
-A = rand(5, 5)
-b = A * ones(5)
-x = A \ b
+using BundleAdjustmentModels
 ```
 
-Testing
+Using the 'problems_df()' function will show you a dataframe of all the bundle adjustment problems.
 
 ```julia:ex2
-using LinearAlgebra
-norm(A * x - b), norm(x .- 1)
+df = problems_df()
 ```
-
-## Plotting
-
-Use `joinpath("__site/assets", filename)` as the path to save the image in the right place and use `{{ rfig filename.ext Caption of image }}` to add the image afterwards.
-It is a good idea to use `# hide` so the save command doesn't appear. See the example below.
-
-```julia:ex3
-using Plots
-
-x = rand(3)
-y = rand(3)
-plot(x, y)
-png(joinpath("__site/assets", "myplot")) # hide
-```
-
-{{ rfig myplot.png Example of plot and description }}
 
