@@ -1,3 +1,0 @@
-ArgumentError: Package BundleAdjustmentModels not found in current path:
-- Run `import Pkg; Pkg.add("BundleAdjustmentModels")` to install the BundleAdjustmentModels package.
-

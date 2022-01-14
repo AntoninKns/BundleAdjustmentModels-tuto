@@ -1,5 +1,155 @@
-<!doctype html> <html lang=en  class=has-navbar-fixed-top > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/libs/highlight/github.min.css"> <link rel=stylesheet  href="/css/styles.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="/assets/favicon.png"> <title>How to use bundle adjustment models</title> <script src="/libs/highlight/highlight.pack.js"></script> <script src="https://unpkg.com/clipboard@2/dist/clipboard.min.js"></script> <script type=module  src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script> <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script> <script> hljs.getLanguage('julia').keywords.custom = 'obj grad hess AbstractNLPModel'; </script> <nav class="navbar is-primary is-fixed-top" role=navigation  aria-label="main navigation"> <div class=navbar-brand > <a class=navbar-item  href="https://jso-docs.github.io"> <img src="/assets/jso.png"> </a> <a role=button  class=navbar-burger  aria-label=menu  aria-expanded=false  data-target=navbarBasicExample > <span aria-hidden=true ></span> <span aria-hidden=true ></span> <span aria-hidden=true ></span> </a> </div> <div id=navbarBasicExample  class=navbar-menu > <div class=navbar-start > <a class=navbar-item  href="/"> Home </a> <a class=navbar-item  href="/tutorials"> Tutorials </a> <div class="navbar-item has-dropdown is-hoverable"> <a class=navbar-link  href="/ecosystems/index.html"> Ecosystems </a> <div class=navbar-dropdown > <a class=navbar-item  href="/ecosystems/linear-algebra"> Linear Algebra </a> <a class=navbar-item  href="/ecosystems/models"> Models </a> <a class=navbar-item  href="/ecosystems/solvers"> Solvers </a> </div> </div> <a class=navbar-item  href="/references"> References </a> <a class=navbar-item  href="/contributing"> Contributing </a> </div> <div class=navbar-end > <div class=navbar-item > </div> </div> </div> </nav> <section class=section > <div class=container > <div class=content ><div class=franklin-content ><h1 id=title ><a href="#title" class=header-anchor >How to use bundle adjustment models</a></h1></p> <div class=author >by Antonin Kenens</div> <p> <h1 id=how_to_use_bundle_adjustment_models ><a href="#how_to_use_bundle_adjustment_models" class=header-anchor >How to use bundle adjustment models</a></h1> <pre><code class=language-julia >using BundleAdjustmentModels</code></pre><pre><code class="plaintext code-output">ArgumentError: Package BundleAdjustmentModels not found in current path:
-- Run `import Pkg; Pkg.add("BundleAdjustmentModels")` to install the BundleAdjustmentModels package.
+<!doctype html> <html lang=en  class=has-navbar-fixed-top > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/libs/highlight/github.min.css"> <link rel=stylesheet  href="/css/styles.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="/assets/favicon.png"> <title>How to use bundle adjustment models</title> <script src="/libs/highlight/highlight.pack.js"></script> <script src="https://unpkg.com/clipboard@2/dist/clipboard.min.js"></script> <script type=module  src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script> <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script> <script> hljs.getLanguage('julia').keywords.custom = 'obj grad hess AbstractNLPModel'; </script> <nav class="navbar is-primary is-fixed-top" role=navigation  aria-label="main navigation"> <div class=navbar-brand > <a class=navbar-item  href="https://jso-docs.github.io"> <img src="/assets/jso.png"> </a> <a role=button  class=navbar-burger  aria-label=menu  aria-expanded=false  data-target=navbarBasicExample > <span aria-hidden=true ></span> <span aria-hidden=true ></span> <span aria-hidden=true ></span> </a> </div> <div id=navbarBasicExample  class=navbar-menu > <div class=navbar-start > <a class=navbar-item  href="/"> Home </a> <a class=navbar-item  href="/tutorials"> Tutorials </a> <div class="navbar-item has-dropdown is-hoverable"> <a class=navbar-link  href="/ecosystems/index.html"> Ecosystems </a> <div class=navbar-dropdown > <a class=navbar-item  href="/ecosystems/linear-algebra"> Linear Algebra </a> <a class=navbar-item  href="/ecosystems/models"> Models </a> <a class=navbar-item  href="/ecosystems/solvers"> Solvers </a> </div> </div> <a class=navbar-item  href="/references"> References </a> <a class=navbar-item  href="/contributing"> Contributing </a> </div> <div class=navbar-end > <div class=navbar-item > </div> </div> </div> </nav> <section class=section > <div class=container > <div class=content ><div class=franklin-content ><h1 id=title ><a href="#title" class=header-anchor >How to use bundle adjustment models</a></h1></p> <div class=author >by Antonin Kenens</div> <p><img class=badge  src="https://img.shields.io/badge/BundleAdjustmentModels-0.1.1-666?style=flat-square&labelColor=999"> <h1 id=how_to_use_bundle_adjustment_models ><a href="#how_to_use_bundle_adjustment_models" class=header-anchor >How to use bundle adjustment models</a></h1> <pre><code class=language-julia >using BundleAdjustmentModels</code></pre>
+<p>Using the &#39;problems_df&#40;&#41;&#39; function will show you a dataframe of all the bundle adjustment problems.</p>
+<pre><code class=language-julia >df &#61; problems_df&#40;&#41;</code></pre><pre><code class="plaintext code-output">74×5 DataFrame
+ Row │ name                     group      nequ      nvar     nnzj
+     │ String                   String     Int64     Int64    Int64
+─────┼──────────────────────────────────────────────────────────────────
+   1 │ problem-16-22106-pre     dubrovnik    167436    66462    2009232
+   2 │ problem-88-64298-pre     dubrovnik    767874   193686    9214488
+   3 │ problem-135-90642-pre    dubrovnik   1106672   273141   13280064
+   4 │ problem-142-93602-pre    dubrovnik   1131216   282084   13574592
+   5 │ problem-150-95821-pre    dubrovnik   1136238   288813   13634856
+   6 │ problem-161-103832-pre   dubrovnik   1184038   312945   14208456
+   7 │ problem-173-111908-pre   dubrovnik   1269140   337281   15229680
+   8 │ problem-182-116770-pre   dubrovnik   1337410   351948   16048920
+   9 │ problem-202-132796-pre   dubrovnik   1503304   400206   18039648
+  10 │ problem-237-154414-pre   dubrovnik   1716662   465375   20599944
+  11 │ problem-253-163691-pre   dubrovnik   1798310   493350   21579720
+  12 │ problem-262-169354-pre   dubrovnik   1839376   510420   22072512
+  13 │ problem-273-176305-pre   dubrovnik   1885940   531372   22631280
+  14 │ problem-287-182023-pre   dubrovnik   1942584   548652   23311008
+  15 │ problem-308-195089-pre   dubrovnik   2090394   588039   25084728
+  16 │ problem-356-226730-pre   dubrovnik   2510536   683394   30126432
+  17 │ problem-21-11315-pre     trafalgar     72910    34134     874920
+  18 │ problem-39-18060-pre     trafalgar    127102    54531    1525224
+  19 │ problem-50-20431-pre     trafalgar    147934    61743    1775208
+  20 │ problem-126-40037-pre    trafalgar    296656   121245    3559872
+  21 │ problem-138-44033-pre    trafalgar    331798   133341    3981576
+  22 │ problem-161-48126-pre    trafalgar    364144   145827    4369728
+  23 │ problem-170-49267-pre    trafalgar    371630   149331    4459560
+  24 │ problem-174-50489-pre    trafalgar    377618   153033    4531416
+  25 │ problem-193-53101-pre    trafalgar    393052   161040    4716624
+  26 │ problem-201-54427-pre    trafalgar    399876   165090    4798512
+  27 │ problem-206-54562-pre    trafalgar    401430   165540    4817160
+  28 │ problem-215-55910-pre    trafalgar    408404   169665    4900848
+  29 │ problem-225-57665-pre    trafalgar    417244   175020    5006928
+  30 │ problem-257-65132-pre    trafalgar    451822   197709    5421864
+  31 │ problem-49-7776-pre      ladybug       63686    23769     764232
+  32 │ problem-73-11032-pre     ladybug       92244    33753    1106928
+  33 │ problem-138-19878-pre    ladybug      170434    60876    2045208
+  34 │ problem-318-41628-pre    ladybug      359838   127746    4318056
+  35 │ problem-372-47423-pre    ladybug      408944   145617    4907328
+  36 │ problem-412-52215-pre    ladybug      448484   160353    5381808
+  37 │ problem-460-56811-pre    ladybug      483754   174573    5805048
+  38 │ problem-539-65220-pre    ladybug      554546   200511    6654552
+  39 │ problem-598-69218-pre    ladybug      608340   213036    7300080
+  40 │ problem-646-73584-pre    ladybug      654594   226566    7855128
+  41 │ problem-707-78455-pre    ladybug      699880   241728    8398560
+  42 │ problem-783-84444-pre    ladybug      754104   260379    9049248
+  43 │ problem-810-88814-pre    ladybug      787550   273732    9450600
+  44 │ problem-856-93344-pre    ladybug      831538   287736    9978456
+  45 │ problem-885-97473-pre    ladybug      869810   300384   10437720
+  46 │ problem-931-102699-pre   ladybug      914920   316476   10979040
+  47 │ problem-969-105826-pre   ladybug      949254   326199   11391048
+  48 │ problem-1031-110968-pre  ladybug     1000530   342183   12006360
+  49 │ problem-1064-113655-pre  ladybug     1020422   350541   12245064
+  50 │ problem-1118-118384-pre  ladybug     1057852   365214   12694224
+  51 │ problem-1152-122269-pre  ladybug     1091638   377175   13099656
+  52 │ problem-1197-126327-pre  ladybug     1127468   389754   13529616
+  53 │ problem-1235-129634-pre  ladybug     1152572   400017   13830864
+  54 │ problem-1266-132593-pre  ladybug     1175884   409173   14110608
+  55 │ problem-1340-137079-pre  ladybug     1225186   423297   14702232
+  56 │ problem-1469-145199-pre  ladybug     1283292   448818   15399504
+  57 │ problem-1514-147317-pre  ladybug     1302960   455577   15635520
+  58 │ problem-1587-150845-pre  ladybug     1326578   466818   15918936
+  59 │ problem-1642-153820-pre  ladybug     1342536   476238   16110432
+  60 │ problem-1695-155710-pre  ladybug     1353190   482385   16238280
+  61 │ problem-52-64053-pre     venice       694346   192627    8332152
+  62 │ problem-89-110973-pre    venice      1125952   333720   13511424
+  63 │ problem-245-198739-pre   venice      2182772   598422   26193264
+  64 │ problem-427-310384-pre   venice      3398290   934995   40779480
+  65 │ problem-744-543562-pre   venice      6117726  1637382   73412712
+  66 │ problem-951-708276-pre   venice      7497784  2133387   89973408
+  67 │ problem-1102-780462-pre  venice      8104680  2351304   97256160
+  68 │ problem-1158-802917-pre  venice      8261006  2419173   99132072
+  69 │ problem-1184-816583-pre  venice      8358094  2460405  100297128
+  70 │ problem-1238-843534-pre  venice      8581006  2541744  102972072
+  71 │ problem-1288-866452-pre  venice      8766012  2610948  105192144
+  72 │ problem-1350-894716-pre  venice      9034252  2696298  108411024
+  73 │ problem-1408-912229-pre  venice      9269060  2749359  111228720
+  74 │ problem-1778-993923-pre  venice     10003892  2997771  120046704</code></pre>
 
-</code></pre> <p>Using the &#39;problems_df&#40;&#41;&#39; function will show you a dataframe of all the bundle adjustment problems.</p> <pre><code class=language-julia >df &#61; problems_df&#40;&#41;</code></pre><pre><code class="plaintext code-output">UndefVarError: problems_df not defined
-</code></pre> </div> </div> </div> </div> </section> <script>hljs.initHighlightingOnLoad(); hljs.configure({ tabReplace: ' ' });</script> <script> (function () { // Get the elements. // - the 'pre' element. // - the 'div' with the 'paste-content' id. var pre = document.getElementsByTagName('pre'); // Add a copy button in the 'pre' element with className language-julia for (var i = 0; i < pre.length; i++) { var isLanguage = pre[i].children[0].className.indexOf('language-julia'); if (isLanguage === 0) { var ion_icon = document.createElement('ion-icon'); ion_icon.name = 'copy'; var icon = document.createElement('span'); icon.className = 'icon has-text-primary'; icon.appendChild(ion_icon); var button = document.createElement('button'); button.className = 'button copy-button is-light is-primary'; button.appendChild(icon); pre[i].appendChild(button); } }; // Run Clipboard var copyCode = new ClipboardJS('.copy-button', { target: function (trigger) { return trigger.previousElementSibling; } }); copyCode.on('success', function (event) { event.clearSelection(); var btn = event.trigger; var old_button_class = btn.className; var old_icon_class = btn.children[0].className; btn.className = 'button copy-button is-primary'; btn.children[0].className = 'icon has-text-white'; window.setTimeout(function () { event.trigger.className = old_button_class; event.trigger.children[0].className = old_icon_class; }, 1000); }); })(); </script> <footer class=footer > <div class="content has-text-centered is-small"> &copy; Abel Soares Siqueira. <br> Last modified: January 14, 2022.<br> <a ckass=link  href="https://github.com/jso-docs/">jso-docs at GitHub</a> </div> </footer>
+</div>
+    </div>  
+    </div>  
+    </div>  
+  </section>  
+
+    
+    
+        
+<script>hljs.initHighlightingOnLoad(); hljs.configure({ tabReplace: '    ' });</script>
+
+
+<script>
+  (function () {
+
+    // Get the elements.
+    // - the 'pre' element.
+    // - the 'div' with the 'paste-content' id.
+
+    var pre = document.getElementsByTagName('pre');
+
+    // Add a copy button in the 'pre' element with className language-julia
+
+    for (var i = 0; i < pre.length; i++) {
+      var isLanguage = pre[i].children[0].className.indexOf('language-julia');
+
+      if (isLanguage === 0) {
+        var ion_icon = document.createElement('ion-icon');
+        ion_icon.name = 'copy';
+
+        var icon = document.createElement('span');
+        icon.className = 'icon has-text-primary';
+        icon.appendChild(ion_icon);
+
+        var button = document.createElement('button');
+        button.className = 'button copy-button is-light is-primary';
+        button.appendChild(icon);
+
+        pre[i].appendChild(button);
+      }
+    };
+
+    // Run Clipboard
+
+    var copyCode = new ClipboardJS('.copy-button', {
+      target: function (trigger) {
+        return trigger.previousElementSibling;
+      }
+    });
+
+    copyCode.on('success', function (event) {
+      event.clearSelection();
+      var btn = event.trigger;
+      var old_button_class = btn.className;
+      var old_icon_class = btn.children[0].className;
+      btn.className = 'button copy-button is-primary';
+      btn.children[0].className = 'icon has-text-white';
+      window.setTimeout(function () {
+        event.trigger.className = old_button_class;
+        event.trigger.children[0].className = old_icon_class;
+      }, 1000);
+
+    });
+
+  })();
+</script>
+    
+    <footer class=footer >
+      <div class="content has-text-centered is-small">
+        &copy; Abel Soares Siqueira. <br>
+        Last modified: January 14, 2022.<br>
+        <a ckass=link  href="https://github.com/jso-docs/">jso-docs at GitHub</a>
+      </div>
+    </footer>
