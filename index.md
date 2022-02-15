@@ -1,4 +1,4 @@
-@def title = "How to use bundle adjustment models"
+@def title = "A simple guide to BundleAdjustmentModels !"
 @def showall = true
 @def tags = ["bundle adjustment", "model", "big sparse matrices"]
 
