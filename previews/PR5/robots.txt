@@ -1,0 +1,4 @@
+Sitemap: https://BundleAdjustmentModels-tuto.netlify.app/previews/PR5/sitemap.xml
+
+User-agent: *
+Disallow:
