@@ -1,0 +1,211 @@
+<!doctype html> <html lang=en  class=has-navbar-fixed-top > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/previews/PR3/libs/highlight/github.min.css"> <link rel=stylesheet  href="https://tutorial-template.netlify.app/previews/PR3//css/styles.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="https://tutorial-template.netlify.app/previews/PR3//assets/favicon.png"> <title>A simple guide to BundleAdjustmentModels !</title> <script src="/previews/PR3/libs/highlight/highlight.pack.js"></script> <script src="https://unpkg.com/clipboard@2/dist/clipboard.min.js"></script> <script type=module  src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script> <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script> <script> hljs.getLanguage('julia').keywords.custom = 'obj grad hess AbstractNLPModel'; </script> <nav class="navbar is-primary is-fixed-top" role=navigation  aria-label="main navigation"> <div class=navbar-brand > <a class=navbar-item  href="https://tutorial-template.netlify.app/previews/PR3/"> <img src="https://tutorial-template.netlify.app/previews/PR3//assets/jso.png"> </a> <a role=button  class=navbar-burger  aria-label=menu  aria-expanded=false  data-target=navbarBasicExample > <span aria-hidden=true ></span> <span aria-hidden=true ></span> <span aria-hidden=true ></span> </a> </div> <div id=navbarBasicExample  class=navbar-menu > <div class=navbar-start > <a class=navbar-item  href="https://tutorial-template.netlify.app/previews/PR3//"> Home </a> <a class=navbar-item  href="https://tutorial-template.netlify.app/previews/PR3//tutorials"> Tutorials </a> <div class="navbar-item has-dropdown is-hoverable"> <a class=navbar-link  href="https://tutorial-template.netlify.app/previews/PR3//ecosystems/index.html"> Ecosystems </a> <div class=navbar-dropdown > <a class=navbar-item  href="https://tutorial-template.netlify.app/previews/PR3//ecosystems/linear-algebra"> Linear Algebra </a> <a class=navbar-item  href="https://tutorial-template.netlify.app/previews/PR3//ecosystems/models"> Models </a> <a class=navbar-item  href="https://tutorial-template.netlify.app/previews/PR3//ecosystems/solvers"> Solvers </a> </div> </div> <a class=navbar-item  href="https://tutorial-template.netlify.app/previews/PR3//references"> References </a> <a class=navbar-item  href="https://tutorial-template.netlify.app/previews/PR3//contributing"> Contributing </a> </div> <div class=navbar-end > <div class=navbar-item > </div> </div> </div> </nav> <section class=section > <div class=container > <div class=content ><div class=franklin-content ><h1 id=title ><a href="#title" class=header-anchor >A simple guide to BundleAdjustmentModels !</a></h1></p> <div class=author >by Antonin Kenens</div> <p><img class=badge  src="https://img.shields.io/badge/BundleAdjustmentModels-0.1.1-hsl(55,100%25,30%25)?style=flat-square&labelColor=hsl(55,30%25,30%25)"> <img class=badge  src="https://img.shields.io/badge/LinearAlgebra-STDLIB-666?style=flat-square&labelColor=444"> <img class=badge  src="https://img.shields.io/badge/NLPModels-0.17.2-hsl(175,100%25,30%25)?style=flat-square&labelColor=hsl(175,30%25,30%25)"> <h1 id=how_to_use_bundle_adjustment_models ><a href="#how_to_use_bundle_adjustment_models" class=header-anchor >How to use bundle adjustment models</a></h1> <div class=franklin-toc ><ol><li><a href="#get_the_list_of_problems">Get the list of problems</a><li><a href="#get_the_raw_file">Get the raw file</a><li><a href="#generate_a_non_linear_least_square_model">Generate a non linear least square model</a><li><a href="#using_the_model">Using the model</a><ol><li><a href="#residual_of_the_model">Residual of the model</a><li><a href="#jacobian_of_the_model">Jacobian of the model</a></ol><li><a href="#delete_the_problems">Delete the problems</a></ol></div> <h2 id=get_the_list_of_problems ><a href="#get_the_list_of_problems" class=header-anchor >Get the list of problems</a></h2> <pre><code class=language-julia >using BundleAdjustmentModels</code></pre>
+<p>Using the &#39;problems_df&#40;&#41;&#39; function will show you a dataframe of all the bundle adjustment problems.</p>
+<p>Since there are 74 different matrices, you can sort the dataframe depending on</p>
+<ul>
+<li><p>the name of the model</p>
+
+<li><p>the group of the model</p>
+
+<li><p>the size of matrix &#40;nequ, nvar&#41;</p>
+
+<li><p>the number of non-zeros elements &#40;nnzj&#41;</p>
+
+</ul>
+<pre><code class=language-julia >df &#61; problems_df&#40;&#41;
+filtered_df &#61; df&#91; &#40; df.nequ .≥ 50000 &#41; .&amp; &#40; df.nvar .≤ 34000 &#41;, :&#93;</code></pre><pre><code class="plaintext code-output">2×5 DataFrame
+ Row │ name                  group    nequ   nvar   nnzj
+     │ String                String   Int64  Int64  Int64
+─────┼──────────────────────────────────────────────────────
+   1 │ problem-49-7776-pre   ladybug  63686  23769   764232
+   2 │ problem-73-11032-pre  ladybug  92244  33753  1106928</code></pre>
+<p>In the example above, we wanted the mattrix to have at least 50000 lines and less than 34000 columns</p>
+<p>This dataframe is only listing the matrices that you can have access to, but in order to use them you need to download them and that&#39;s how this package is really useful.</p>
+<p>First, let&#39;s see how you can do it and then we&#39;ll explain how it&#39;s done</p>
+<p>As you can see just above, we got a dataframe of two problems that we filtered. What we want to do now is to select the first one in the listing</p>
+<pre><code class=language-julia >name, group &#61; get_first_name_and_group&#40;filtered_df&#41;</code></pre><pre><code class="plaintext code-output">("problem-49-7776-pre", "ladybug")</code></pre>
+<p>What this method did is that it selected the name and the group of the problem in the dataframe.</p>
+<p>Now that you got the name and the groupe you probably want to have access to the problem itself. And there are 2 solutions :</p>
+<ul>
+<li><p>You can download the raw file</p>
+
+<li><p>You can automatically create a non linear least square problem using NLPModels from JuliaSmoothOptimizers</p>
+
+</ul>
+<h2 id=get_the_raw_file ><a href="#get_the_raw_file" class=header-anchor >Get the raw file</a></h2>
+<p>First, you might wonder, why did I go through all of this to get a file I can directly download on the original website if I don&#39;t want to use NLPModels. The reason is : <strong>it is cleaner</strong>. We use Julia Artifacts technology so this way :</p>
+<ol>
+<li><p>You download every matrix only once</p>
+
+<li><p>It is identified with a unique hash so you can always find it back</p>
+
+<li><p>You can delete it all with a single command line</p>
+
+</ol>
+<pre><code class=language-julia >path &#61; fetch_ba_name&#40;name, group&#41;</code></pre><pre><code class="plaintext code-output">"/home/runner/.julia/artifacts/dd2da5f94014b5f9086a2b38a87f8c1bc171b9c2"</code></pre>
+<p>This method, used with the variables <code>name</code> and <code>group</code> defined above, will automatically download the problem and give you the path to it. If it is already downloaded it will simply get you the path to it.</p>
+<p>You can also directly download and get access to an entire group of problems like this :</p>
+<pre><code class=language-julia >paths &#61; fetch_ba_group&#40;&quot;ladybug&quot;&#41;
+println&#40;length&#40;paths&#41;&#41;
+println&#40;paths&#91;1&#93;&#41;</code></pre><pre><code class="plaintext code-output">30
+/home/runner/.julia/artifacts/dd2da5f94014b5f9086a2b38a87f8c1bc171b9c2
+</code></pre>
+<p>It will return a vector of the paths to all the problems.</p>
+<h2 id=generate_a_non_linear_least_square_model ><a href="#generate_a_non_linear_least_square_model" class=header-anchor >Generate a non linear least square model</a></h2>
+<p>Now, let&#39;s say you want to work on the model itself.</p>
+<pre><code class=language-julia >model &#61; BundleAdjustmentModel&#40;name, group&#41;</code></pre><pre><code class="plaintext code-output">BundleAdjustmentModels.BundleAdjustmentModel{Float64, Vector{Float64}}
+  Problem name: problem-49-7776-pre
+   All variables: ████████████████████ 23769  All constraints: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0        All residuals: ████████████████████ 63686 
+            free: ████████████████████ 23769             free: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0               linear: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+           lower: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                lower: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0            nonlinear: ████████████████████ 63686 
+           upper: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                upper: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 nnzj: ( 99.95% sparsity)   764232
+         low/upp: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0              low/upp: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 nnzh: (  0.00% sparsity)   282494565
+           fixed: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                fixed: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+          infeas: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0               infeas: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+            nnzh: (  0.00% sparsity)   282494565          linear: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+                                                    nonlinear: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+                                                         nnzj: (------% sparsity)         
+
+  Counters:
+             obj: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 grad: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 cons: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+            jcon: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                jgrad: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                  jac: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+           jprod: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0               jtprod: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 hess: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+           hprod: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                jhess: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0               jhprod: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+        residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0         jac_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0       jprod_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+ jtprod_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0        hess_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0       jhess_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+  hprod_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+</code></pre>
+<p>Or</p>
+<pre><code class=language-julia >model &#61; BundleAdjustmentModel&#40;&quot;problem-49-7776-pre&quot;, &quot;ladybug&quot;&#41;</code></pre><pre><code class="plaintext code-output">BundleAdjustmentModels.BundleAdjustmentModel{Float64, Vector{Float64}}
+  Problem name: problem-49-7776-pre
+   All variables: ████████████████████ 23769  All constraints: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0        All residuals: ████████████████████ 63686 
+            free: ████████████████████ 23769             free: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0               linear: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+           lower: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                lower: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0            nonlinear: ████████████████████ 63686 
+           upper: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                upper: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 nnzj: ( 99.95% sparsity)   764232
+         low/upp: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0              low/upp: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 nnzh: (  0.00% sparsity)   282494565
+           fixed: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                fixed: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+          infeas: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0               infeas: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+            nnzh: (  0.00% sparsity)   282494565          linear: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+                                                    nonlinear: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+                                                         nnzj: (------% sparsity)         
+
+  Counters:
+             obj: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 grad: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 cons: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+            jcon: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                jgrad: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                  jac: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+           jprod: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0               jtprod: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                 hess: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+           hprod: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0                jhess: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0               jhprod: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+        residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0         jac_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0       jprod_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+ jtprod_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0        hess_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0       jhess_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+  hprod_residual: ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ 0     
+</code></pre>
+<p>This command will generate the model out of the <code>name</code> and <code>group</code> variables defined above &#40;and automatically download it if it&#39;s not been done already&#41;.</p>
+<p>If you already have downloaded one of the problems or modified it yourself, you can use the following method <code>BundleAdjustmentModel&#40;&quot;../path/to/file/problem-49-7776-pre.txt.bz2&quot;&#41;</code>.</p>
+<h2 id=using_the_model ><a href="#using_the_model" class=header-anchor >Using the model</a></h2>
+<p>Now that you have your model and all its metadata in your <code>model</code> variable you might want to use it.</p>
+<pre><code class=language-julia >using NLPModels
+using LinearAlgebra</code></pre>
+<h3 id=residual_of_the_model ><a href="#residual_of_the_model" class=header-anchor >Residual of the model</a></h3>
+<p>You can calculate the residual of the model :</p>
+<pre><code class=language-julia >x &#61; model.meta.x0
+Fx &#61; residual&#40;model,x&#41;
+println&#40;norm&#40;Fx&#41;&#41;</code></pre><pre><code class="plaintext code-output">1304.5401187244804
+</code></pre>
+<p>The in place method is also available if you don&#39;t want to use too much memory</p>
+<pre><code class=language-julia >Fx &#61; zeros&#40;model.nls_meta.nequ&#41;
+Fx &#61; residual&#33;&#40;model,x,Fx&#41;
+println&#40;norm&#40;Fx&#41;&#41;</code></pre><pre><code class="plaintext code-output">1304.5401187244804
+</code></pre>
+<h3 id=jacobian_of_the_model ><a href="#jacobian_of_the_model" class=header-anchor >Jacobian of the model</a></h3>
+<p>You can also have access to the jacobian of the model which is calculated by hand &#40;in contradiction to automatic differentiation&#41;.</p>
+<pre><code class=language-julia >Jx &#61; jac_op_residual&#40;model,x&#41;</code></pre><pre><code class="plaintext code-output">Linear operator
+  nrow: 63686
+  ncol: 23769
+  eltype: Float64
+  symmetric: false
+  hermitian: false
+  nprod:   0
+  ntprod:  0
+  nctprod: 0
+
+</code></pre>
+<h2 id=delete_the_problems ><a href="#delete_the_problems" class=header-anchor >Delete the problems</a></h2>
+<p>Once you have finished working with a specific model you can delete it the same way you downloaded it.</p>
+<pre><code class=language-julia >delete_ba_artifact&#33;&#40;name, group&#41;</code></pre>
+<p>A small Info will appear to tell you if it&#39;s been successfully deleted.</p>
+<p>Now if you want to clean your workspace or save some space you can delete all the problems at once.</p>
+<pre><code class=language-julia >delete_all_ba_artifacts&#33;&#40;&#41;</code></pre>
+<p>That&#39;s it for this tutorial &#33; If you have any problems with the package don&#39;t hesitate to open an issue and I will try to fix it.</p>
+
+</div>
+    </div>  
+    </div>  
+    </div>  
+  </section>  
+
+    
+    
+        
+<script>hljs.initHighlightingOnLoad(); hljs.configure({ tabReplace: '    ' });</script>
+
+
+<script>
+  (function () {
+
+    // Get the elements.
+    // - the 'pre' element.
+    // - the 'div' with the 'paste-content' id.
+
+    var pre = document.getElementsByTagName('pre');
+
+    // Add a copy button in the 'pre' element with className language-julia
+
+    for (var i = 0; i < pre.length; i++) {
+      var isLanguage = pre[i].children[0].className.indexOf('language-julia');
+
+      if (isLanguage === 0) {
+        var ion_icon = document.createElement('ion-icon');
+        ion_icon.name = 'copy';
+
+        var icon = document.createElement('span');
+        icon.className = 'icon has-text-primary';
+        icon.appendChild(ion_icon);
+
+        var button = document.createElement('button');
+        button.className = 'button copy-button is-light is-primary';
+        button.appendChild(icon);
+
+        pre[i].appendChild(button);
+      }
+    };
+
+    // Run Clipboard
+
+    var copyCode = new ClipboardJS('.copy-button', {
+      target: function (trigger) {
+        return trigger.previousElementSibling;
+      }
+    });
+
+    copyCode.on('success', function (event) {
+      event.clearSelection();
+      var btn = event.trigger;
+      var old_button_class = btn.className;
+      var old_icon_class = btn.children[0].className;
+      btn.className = 'button copy-button is-primary';
+      btn.children[0].className = 'icon has-text-white';
+      window.setTimeout(function () {
+        event.trigger.className = old_button_class;
+        event.trigger.children[0].className = old_icon_class;
+      }, 1000);
+
+    });
+
+  })();
+</script>
+    
+    <footer class=footer >
+      <div class="content has-text-centered is-small">
+        &copy; Abel Soares Siqueira. <br>
+        Last modified: March 08, 2022.<br>
+        <a ckass=link  href="https://github.com/jso-docs/">jso-docs at GitHub</a>
+      </div>
+    </footer>
