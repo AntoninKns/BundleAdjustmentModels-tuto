@@ -1,0 +1,12 @@
+[deps]
+BundleAdjustmentModels = "0bf3e898-7c79-4b38-9ca6-2d9cc6573905"
+Franklin = "713c75ef-9fc9-4b05-94a9-213340da978e"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+NLPModels = "a4795742-8479-5a88-8948-cc11e1c8c1a6"
+NodeJS = "2bd173c7-0d6d-553b-b6af-13a54713934c"
+
+[compat]
+BundleAdjustmentModels = "0.1.1"
+Franklin = "0.10"
+JSON = "0.21"
+NodeJS = "1.3"
